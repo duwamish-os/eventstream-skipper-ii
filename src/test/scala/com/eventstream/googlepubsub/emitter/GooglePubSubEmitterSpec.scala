@@ -1,5 +1,7 @@
 package com.eventstream.googlepubsub.emitter
 
+import java.time.LocalDateTime
+
 object GooglePubSubEmitterSpec {
 
   val emitter = new GooglePubSubEmitter(
@@ -10,11 +12,12 @@ object GooglePubSubEmitterSpec {
   def main(args: Array[String]): Unit = {
 
     val result = emitter.emit(
-      """
+      s"""
       {
         "eventID": "1",
         "customerID": "prayagupd",
-        "orderID": "DUWAMISH-001"
+        "orderID": "DUWAMISH-001",
+        "created": s"${LocalDateTime.now().toString}"
       }
     """.stripMargin)
 

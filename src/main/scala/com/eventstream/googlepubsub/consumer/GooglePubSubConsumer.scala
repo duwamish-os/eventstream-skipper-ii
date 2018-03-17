@@ -18,18 +18,33 @@ trait Consumer {
   def shutdown(): Try[State]
 }
 
+trait EventProcessor {
+  def process(eventID: String, event: String): String
+}
+
+class GooglePubSubConsoleEventProcessor extends EventProcessor {
+
+  override def process(eventID: String, event: String): String = {
+    println("processing " + eventID + ":" + event)
+    eventID
+  }
+
+}
+
 case class ConsumerConfig(projectName: String,
                           consumerMasterName: String,
                           credentials: String)
 
 //TODO inject a processor
-class GooglePubSubConsumer(consumerConfig: ConsumerConfig) extends Consumer {
+class GooglePubSubConsumer(consumerConfig: ConsumerConfig, eventProcessor: EventProcessor) extends Consumer {
 
   private val events = new LinkedBlockingDeque[PubsubMessage]()
 
   private val consumer = Try(Subscriber.newBuilder(ProjectSubscriptionName.of(consumerConfig.projectName, consumerConfig.consumerMasterName),
     (message: PubsubMessage, consumer: AckReplyConsumer) => {
       events.offer(message)
+      println("update event offset")
+      //TODO update inside processor after actually processsing
       consumer.ack()
     })
     .setCredentialsProvider(cred)
@@ -41,8 +56,7 @@ class GooglePubSubConsumer(consumerConfig: ConsumerConfig) extends Consumer {
 
     while (true) {
       val event = events.take()
-      //processor.process(event.getData.toStringUtf8)
-      println(event.getData.toStringUtf8)
+      eventProcessor.process(event.getMessageId, event.getData.toStringUtf8)
     }
   }
 
