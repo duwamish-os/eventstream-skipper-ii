@@ -1,4 +1,4 @@
-name := "orders-streaming"
+name := "eventstream-skipper"
 
 version := "0.1"
 
