@@ -19,8 +19,8 @@ case class EmitterConfig(projectID: String, topicName: String, credentials: Stri
 
 class GooglePubSubEmitter(config: EmitterConfig) extends Emitter {
 
-  val publisher = Try(Publisher.newBuilder(ProjectTopicName.of(config.projectID, config.topicName))
-    .setCredentialsProvider(FixedCredentialsProvider.create(GoogleCredentials.fromStream(new FileInputStream(config.credentials))))
+  private val publisher = Try(Publisher.newBuilder(ProjectTopicName.of(config.projectID, config.topicName))
+    .setCredentialsProvider(cred)
     .build())
 
   override def emit(event: String): String = {
@@ -45,4 +45,6 @@ class GooglePubSubEmitter(config: EmitterConfig) extends Emitter {
 
     result
   }
+
+  private def cred = FixedCredentialsProvider.create(GoogleCredentials.fromStream(new FileInputStream(config.credentials)))
 }
